@@ -2,9 +2,8 @@
                 AWS Route53
 ==========================================*/
 
-data "aws_route53_zone" "main" {
-  name         = "brzwdev.com"
-  private_zone = false
+resource "aws_route53_zone" "main" {
+  name         = "example.com"
 }
 
 # Route53 record for acm validation
@@ -22,13 +21,13 @@ resource "aws_route53_record" "validation" {
   records         = [each.value.record]
   ttl             = 60
   type            = each.value.type
-  zone_id         = data.aws_route53_zone.main.zone_id
+  zone_id         = aws_route53_zone.main.zone_id
 }
 
 # Route53 record for ALB
 resource "aws_route53_record" "main" {
-  zone_id         = data.aws_route53_zone.main.zone_id
-  name            = "${var.route_53_name}.brzwdev.com"
+  zone_id         = aws_route53_zone.main.zone_id
+  name            = "${var.route_53_name}.example.com"
   type            = "CNAME"
   ttl             = 60
   allow_overwrite = true
@@ -37,7 +36,7 @@ resource "aws_route53_record" "main" {
 
 # ACM certificate for ALB HTTPS
 resource "aws_acm_certificate" "main" {
-  domain_name       = "${var.route_53_name}.brzwdev.com"
+  domain_name       = "${var.route_53_name}.example.com"
   validation_method = "DNS"
 
   lifecycle {

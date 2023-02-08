@@ -13,27 +13,25 @@ resource "aws_ecs_task_definition" "ecs_task_definition" {
 
   container_definitions = <<DEFINITION
     [
-      
+      {
         "image": "${var.docker_repo}",
         "name": "${var.container_name}",
         "networkMode": "awsvpc",
         "portMappings": [
           {
-            "containerPort": 80,
-            "hostPort": 80
+          "containerPort": 80,
+          "hostPort": 80
           }
-        ]
-      },
-        {
+        ],
         "logConfiguration": {
             "logDriver": "awslogs",
-            "secretOptions": null,
             "options": {
-              "awslogs-group": "/ecs/task-definition-${var.name}",
-              "awslogs-region": "${var.region}",
+              "awslogs-group"        : "/ecs/task-definition-${var.name}",
+              "awslogs-region"       : "${var.region}",
               "awslogs-stream-prefix": "ecs"
             }
           }
+        }
     ]
   DEFINITION
 }

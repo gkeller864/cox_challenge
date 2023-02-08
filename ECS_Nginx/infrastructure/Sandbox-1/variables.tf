@@ -48,7 +48,7 @@ variable "container_name" {
   description = "The name of the container of each ECS service"
   type        = map(string)
   default = {
-    nginx                 = "container-nginx"
+    nginx = "container-nginx"
   }
 }
 
@@ -59,7 +59,6 @@ variable "iam_role_name" {
     devops        = "devOps-role"
     ecs           = "ECS-task-execution-role"
     ecs_task_role = "ECS-task-role"
-    codedeploy    = "codedeploy-role"
     ecs_execution = "ECS-task-execution-role2"
   }
 }

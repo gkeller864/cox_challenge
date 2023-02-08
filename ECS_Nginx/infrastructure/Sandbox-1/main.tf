@@ -92,7 +92,6 @@ module "security_group_alb_https" {
 # ------- ECS Role -------
 module "ecs_role" {
   source             = "../Modules/IAM"
-  create_ecs_role    = true
   name               = var.iam_role_name["ecs"]
   name_ecs_task_role = var.iam_role_name["ecs_task_role"]
 }

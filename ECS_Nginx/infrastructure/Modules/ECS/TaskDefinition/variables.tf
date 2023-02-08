@@ -44,19 +44,7 @@ variable "region" {
   type        = string
 }
 
-variable "container_port" {
-  description = "The port that the container will use to listen to requests"
-  type        = number
-}
-
 variable "container_log" {
   description = "Unique identifier for the log group"
   type        = string
 }
-
-variable "app_command" {
-  description = "Unique identifier for the log group"
-  type        = string
-  default     = "brzwnginx.nginx.uwsgi_nginx:combined_nginx"
-}
-

@@ -39,19 +39,13 @@ variable "enable_http" {
   default     = false
 }
 
-variable "enable_81" {
-  description = "Set to true to create a 81 listener"
-  type        = bool
-  default     = false
-}
-
 variable "create_target_group" {
   description = "Set to true to create a Target Group"
   type        = bool
   default     = false
 }
 
-variable "subnets" {
+variable "subnet" {
   description = "Subnets IDs for ALB"
   type        = list(any)
   default     = []

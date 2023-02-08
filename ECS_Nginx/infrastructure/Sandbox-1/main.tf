@@ -3,7 +3,7 @@
 ============================*/
 # ------- Providers -------
 provider "aws" {
-  profile = var.aws_profile
+  ## profile = var.aws_profile
   region  = var.aws_region
 
   # provider level tagging
@@ -43,7 +43,18 @@ module "route53_nginx" {
   source           = "../Modules/Route53"
   environment_name = "${var.environment_name}"
   route_53_name    = "${var.environment_name}"
-  record           = module.nginx.dns_alb
+  record           = module.alb_nginx.dns_alb
+}
+
+# ------- Creating ALB -------
+module "alb_nginx" {
+  source                = "../Modules/ALB"
+  create_alb            = true
+  name                  = "${var.environment_name}-nginx"
+  subnet                = local.public_subnet
+  security_group        = [module.security_group_alb_https.sg_id,module.security_group_alb_http.sg_id]
+  target_group          = module.target_group_nginx.arn_tg
+  nginx_acm_certificate = module.route53_nginx.aws_acm_certificate
 }
 
 # ------- Creating Target Group for the nginx ALB -------
@@ -53,21 +64,10 @@ module "target_group_nginx" {
   name                = "tg-${var.environment_name}-s-b-nginx"
   port                = var.port_app
   protocol            = "HTTP"
-  vpc                 = module.networking.aws_vpc
+  vpc                 = local.vpc_id
   tg_type             = "ip"
   health_check_path   = "/up"
   health_check_port   = var.port_app
-}
-
-# ------- Creating ALB -------
-module "alb_nginx" {
-  source                = "../Modules/ALB"
-  create_alb            = true
-  name                  = "${var.environment_name}-nginx"
-  subnets               = local.public_subnets
-  security_group        = [module.security_group_alb_https.sg_id,module.security_group_alb_http.sg_id]
-  target_group          = module.target_group_nginx.arn_tg
-  nginx_acm_certificate = module.route53_nginx.aws_acm_certificate
 }
 
 # ------- Creating Security Group for the server ALB -------
@@ -75,7 +75,7 @@ module "security_group_alb_http" {
   source              = "../Modules/SecurityGroup"
   name                = "alb-${var.environment_name}-http"
   description         = "Controls access to the ALBs"
-  vpc_id              = module.networking.aws_vpc
+  vpc_id              = local.vpc_id
   cidr_blocks_ingress = ["0.0.0.0/0"]
   ingress_port        = 80
 }
@@ -84,7 +84,7 @@ module "security_group_alb_https" {
   source              = "../Modules/SecurityGroup"
   name                = "alb-${var.environment_name}-https"
   description         = "Controls access to the ALBs"
-  vpc_id              = module.networking.aws_vpc
+  vpc_id              = local.vpc_id
   cidr_blocks_ingress = ["0.0.0.0/0"]
   ingress_port        = 443
 }
@@ -108,6 +108,7 @@ module "ecs_role_policy" {
 # ------- Creating ECS Task Definition for the server -------
 module "ecs_task_definition_nginx" {
   source             = "../Modules/ECS/TaskDefinition"
+  docker_repo        = "nginx:latest"
   name               = "${var.environment_name}-nginx"
   environment_name   = "${var.environment_name}"
   container_name     = "nginx"
@@ -115,10 +116,8 @@ module "ecs_task_definition_nginx" {
   task_role_arn      = module.ecs_role.arn_role_ecs_task_role
   cpu                = 256
   memory             = "512"
-  docker_repo        = module.ecr_source.ecr_repository_url
   region             = var.aws_region
-  container_port     = var.port_app
-  container_log     = "nginx"
+  container_log      = "nginx"
 }
 
 # ------- Creating a server Security Group for ECS TASKS -------
@@ -148,9 +147,9 @@ module "ecs_service_nginx" {
   ecs_cluster_id      = module.ecs_cluster.ecs_cluster_id
   arn_target_group    = module.target_group_nginx.arn_tg
   arn_task_definition = module.ecs_task_definition_nginx.arn_task_definition
-  subnets_id          = [local.private_subnet]
+  subnet_id           = local.private_subnet
   container_port      = var.port_app
-  container_name      = "nginx_nginx"
+  container_name      = "nginx"
 }
 
 # ------- Creating ECS Autoscaling policies for the applications -------

@@ -23,16 +23,19 @@ variable "environment_name" {
 variable "vpc_id" {
   description = "The port used by your backend application"
   type        = number
+  default     = 123
 }
 
 variable "private_subnet_id" {
   description = "The private subnet ID"
   type        = number
+  default     = 123
 }
 
 variable "public_subnet_id" {
   description = "The public subnet ID"
   type        = number
+  default     = 123
 }
 
 variable "port_app" {

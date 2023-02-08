@@ -5,7 +5,7 @@
 resource "aws_alb" "alb" {
   count              = var.create_alb == true ? 1 : 0
   name               = "alb-${var.name}"
-  subnets            = [var.subnets[0], var.subnets[1]]
+  subnets            = var.subnet
   security_groups    = var.security_group
   load_balancer_type = "application"
   internal           = false
